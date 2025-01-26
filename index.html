@@ -1,0 +1,190 @@
+<!-- In this q= London (here to place name of the country or place you want) 
+
+The Request
+http://api.weatherapi.com/v1/current.json?key=9c9c07cbfde24599a5f83259252601&q=London&aqi=yes
+
+The Response
+We get the All the Information like this 
+Response Body
+{
+    "location": {
+        "name": "London",
+        "region": "City of London, Greater London",
+        "country": "United Kingdom",
+        "lat": 51.5171,
+        "lon": -0.1062,
+        "tz_id": "Europe/London",
+        "localtime_epoch": 1737880488,
+        "localtime": "2025-01-26 08:34"
+    },
+    "current": {
+        "last_updated_epoch": 1737880200,
+        "last_updated": "2025-01-26 08:30",
+        "temp_c": 4.2,
+        "temp_f": 39.6,
+        "is_day": 1,
+        "condition": {
+            "text": "Partly cloudy",
+            "icon": "//cdn.weatherapi.com/weather/64x64/day/116.png",
+            "code": 1003
+        },
+        "wind_mph": 12.3,
+        "wind_kph": 19.8,
+        "wind_degree": 157,
+        "wind_dir": "SSE",
+        "pressure_mb": 1000.0,
+        "pressure_in": 29.53,
+        "precip_mm": 0.0,
+        "precip_in": 0.0,
+        "humidity": 81,
+        "cloud": 75,
+        "feelslike_c": 0.1,
+        "feelslike_f": 32.1,
+        "windchill_c": -0.1,
+        "windchill_f": 31.9,
+        "heatindex_c": 4.1,
+        "heatindex_f": 39.4,
+        "dewpoint_c": 0.9,
+        "dewpoint_f": 33.6,
+        "vis_km": 10.0,
+        "vis_miles": 6.0,
+        "uv": 0.0,
+        "gust_mph": 20.3,
+        "gust_kph": 32.7,
+        "air_quality": {
+            "co": 373.7,
+            "no2": 61.605,
+            "o3": 37.0,
+            "so2": 7.03,
+            "pm2_5": 12.765,
+            "pm10": 18.87,
+            "us-epa-index": 1,
+            "gb-defra-index": 2
+        }
+    }
+} 
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        input, button, select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .weather-info {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .weather-info p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Weather App</h1>
+        <input type="text" id="location" placeholder="Enter location" required />
+        <input type="date" id="date" />
+        <button onclick="getWeather()">Get Weather</button>
+        <div class="weather-info" id="weather-info"></div>
+    </div>
+
+    <script>
+        async function getWeather() {
+            const location = document.getElementById('location').value;
+            const date = document.getElementById('date').value;
+            const weatherInfoDiv = document.getElementById('weather-info');
+
+            if (!location) {
+                weatherInfoDiv.innerHTML = '<p>Please enter a location.</p>';
+                return;
+            }
+
+            const baseUrl = "http://api.weatherapi.com/v1/";
+            const endpoint = date ? "history.json" : "current.json";
+            const apiKey = "9c9c07cbfde24599a5f83259252601";
+            const url = `${baseUrl}${endpoint}?key=${apiKey}&q=${location}${date ? `&dt=${date}` : "&aqi=yes"}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.error) {
+                    weatherInfoDiv.innerHTML = `<p>${data.error.message}</p>`;
+                    return;
+                }
+
+                let htmlContent = "";
+                if (date) {
+                    htmlContent += `<p><strong>Location:</strong> ${data.location.name}, ${data.location.country}</p>`;
+                    htmlContent += `<p><strong>Date:</strong> ${data.forecast.forecastday[0].date}</p>`;
+                    htmlContent += `<p><strong>Condition:</strong> ${data.forecast.forecastday[0].day.condition.text}</p>`;
+                    htmlContent += `<p><strong>Avg Temp:</strong> ${data.forecast.forecastday[0].day.avgtemp_c}&#8451;</p>`;
+                } else {
+                    htmlContent += `<p><strong>Location:</strong> ${data.location.name}, ${data.location.country}</p>`;
+                    htmlContent += `<p><strong>Condition:</strong> ${data.current.condition.text}</p>`;
+                    htmlContent += `<p><strong>Temperature:</strong> ${data.current.temp_c}&#8451;</p>`;
+                    htmlContent += `<p><strong>Humidity:</strong> ${data.current.humidity}%</p>`;
+                    htmlContent += `<p><strong>Wind:</strong> ${data.current.wind_kph} kph</p>`;
+                }
+
+                weatherInfoDiv.innerHTML = htmlContent;
+            } catch (error) {
+                weatherInfoDiv.innerHTML = `<p>Failed to fetch weather data. Please try again later.</p>`;
+                console.error("Error fetching weather data:", error);
+            }
+        }
+    </script>
+</body>
+</html>
